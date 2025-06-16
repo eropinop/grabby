@@ -1,8 +1,4 @@
-
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
-
-main
+ main
 (async () => {
   const results = [];
   const imagesForZip = [];
@@ -21,30 +17,12 @@ main
       const res = await fetch(url);
       const blob = await res.blob();
       const dataUrl = await new Promise(resolve => {
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
-=======
-(async () => {
-  const results = [];
-  const origin = location.origin;
-
-  async function imgToDataURL(src) {
-    try {
-      const url = new URL(src, location.href).href;
-      if (!url.startsWith(origin)) return null;
-      const res = await fetch(url);
-      const blob = await res.blob();
-      return await new Promise(resolve => {
-
-main
+        main
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => resolve(null);
         reader.readAsDataURL(blob);
       });
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
-
 main
       imagesForZip.push({
         name: `image_${imagesForZip.length + 1}${extensionForType(blob.type)}`,
@@ -57,16 +35,13 @@ main
   }
 
   async function gatherFromDocument(doc, pageUrl) {
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+main
     const clone = doc.cloneNode(true);
     clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
     const walker = document.createTreeWalker(clone, NodeFilter.SHOW_COMMENT);
     const toRemove = [];
     while (walker.nextNode()) toRemove.push(walker.currentNode);
     for (const node of toRemove) node.parentNode.removeChild(node);
-
-    const clone = doc.cloneNode(true);
-    clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
 main
     const imgs = Array.from(clone.images);
     for (const img of imgs) {
@@ -79,18 +54,6 @@ main
     }
     const html = clone.body ? clone.body.innerHTML : '';
     results.push({ url: pageUrl, html });
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
-
-    const text = doc.body ? doc.body.innerText : '';
-    const images = Array.from(doc.images);
-    const dataUrls = [];
-    for (const img of images) {
-      const data = await imgToDataURL(img.src);
-      if (data) dataUrls.push(data);
-    }
-    results.push({ url: pageUrl, text, images: dataUrls });
-
 main
   }
 
@@ -113,9 +76,6 @@ main
       // ignore fetch errors
     }
   }
-
-m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
 
 main
   let docHtml = '<html><body>';
@@ -147,28 +107,5 @@ main
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(zipBlob, 'images.zip');
   }
- m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
-=======
-
-  let html = '<html><body>';
-  for (const page of results) {
-    html += `<h2>${page.url}</h2>`;
-    html += `<p>${page.text.replace(/\n/g, '<br>')}</p>`;
-    for (const img of page.images) {
-      html += `<img src="${img}"><br>`;
-    }
-  }
-  html += '</body></html>';
-
-  const blob = new Blob([html], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'grab.doc';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-main
 main
 })();
