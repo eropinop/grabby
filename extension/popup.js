@@ -4,5 +4,6 @@ document.getElementById('grab').addEventListener('click', async () => {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: ['jszip.min.js', 'content.js']
+main
   });
 });

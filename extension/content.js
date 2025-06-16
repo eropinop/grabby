@@ -1,4 +1,4 @@
-
+ main
 (async () => {
   const results = [];
   const imagesForZip = [];
@@ -17,11 +17,13 @@
       const res = await fetch(url);
       const blob = await res.blob();
       const dataUrl = await new Promise(resolve => {
+        main
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => resolve(null);
         reader.readAsDataURL(blob);
       });
+main
       imagesForZip.push({
         name: `image_${imagesForZip.length + 1}${extensionForType(blob.type)}`,
         blob
@@ -33,12 +35,14 @@
   }
 
   async function gatherFromDocument(doc, pageUrl) {
+main
     const clone = doc.cloneNode(true);
     clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
     const walker = document.createTreeWalker(clone, NodeFilter.SHOW_COMMENT);
     const toRemove = [];
     while (walker.nextNode()) toRemove.push(walker.currentNode);
     for (const node of toRemove) node.parentNode.removeChild(node);
+main
     const imgs = Array.from(clone.images);
     for (const img of imgs) {
       const data = await imgToDataURL(img.src);
@@ -50,6 +54,7 @@
     }
     const html = clone.body ? clone.body.innerHTML : '';
     results.push({ url: pageUrl, html });
+main
   }
 
   await gatherFromDocument(document, location.href);
@@ -72,6 +77,7 @@
     }
   }
 
+main
   let docHtml = '<html><body>';
   for (const page of results) {
     docHtml += `<h2>${page.url}</h2>`;
@@ -101,4 +107,5 @@
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(zipBlob, 'images.zip');
   }
+main
 })();
