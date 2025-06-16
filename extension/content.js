@@ -1,3 +1,24 @@
+
+
+(async () => {
+  const results = [];
+  const imagesForZip = [];
+  const origin = location.origin;
+
+  function extensionForType(type) {
+    if (type.includes('png')) return '.png';
+    if (type.includes('jpeg')) return '.jpg';
+    if (type.includes('gif')) return '.gif';
+    return '';
+  }
+
+  async function imgToDataURL(src) {
+    try {
+      const url = new URL(src, location.href).href;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const dataUrl = await new Promise(resolve => {
+=======
 (async () => {
   const results = [];
   const origin = location.origin;
@@ -9,17 +30,39 @@
       const res = await fetch(url);
       const blob = await res.blob();
       return await new Promise(resolve => {
+
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => resolve(null);
         reader.readAsDataURL(blob);
       });
+
+      imagesForZip.push({
+        name: `image_${imagesForZip.length + 1}${extensionForType(blob.type)}`,
+        blob
+      });
+      return dataUrl;
     } catch (e) {
       return null;
     }
   }
 
   async function gatherFromDocument(doc, pageUrl) {
+
+    const clone = doc.cloneNode(true);
+    clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+    const imgs = Array.from(clone.images);
+    for (const img of imgs) {
+      const data = await imgToDataURL(img.src);
+      if (data) {
+        img.src = data;
+      } else {
+        img.remove();
+      }
+    }
+    const html = clone.body ? clone.body.innerHTML : '';
+    results.push({ url: pageUrl, html });
+
     const text = doc.body ? doc.body.innerText : '';
     const images = Array.from(doc.images);
     const dataUrls = [];
@@ -28,6 +71,7 @@
       if (data) dataUrls.push(data);
     }
     results.push({ url: pageUrl, text, images: dataUrls });
+
   }
 
   await gatherFromDocument(document, location.href);
@@ -50,6 +94,37 @@
     }
   }
 
+
+  let docHtml = '<html><body>';
+  for (const page of results) {
+    docHtml += `<h2>${page.url}</h2>`;
+    docHtml += page.html;
+  }
+  docHtml += '</body></html>';
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  const docBlob = new Blob([docHtml], { type: 'application/msword' });
+  downloadBlob(docBlob, 'grab.doc');
+
+  if (imagesForZip.length) {
+    const zip = new JSZip();
+    for (const img of imagesForZip) {
+      zip.file(img.name, img.blob);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob(zipBlob, 'images.zip');
+  }
+
   let html = '<html><body>';
   for (const page of results) {
     html += `<h2>${page.url}</h2>`;
@@ -69,4 +144,5 @@
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+main
 })();

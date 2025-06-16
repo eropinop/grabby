@@ -3,6 +3,7 @@ document.getElementById('grab').addEventListener('click', async () => {
   if (!tab) return;
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ['content.js']
+    files: ['jszip.min.js', 'content.js']
+
   });
 });
