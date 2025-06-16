@@ -1,5 +1,8 @@
 
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 
+main
 (async () => {
   const results = [];
   const imagesForZip = [];
@@ -18,6 +21,8 @@
       const res = await fetch(url);
       const blob = await res.blob();
       const dataUrl = await new Promise(resolve => {
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 =======
 (async () => {
   const results = [];
@@ -31,12 +36,16 @@
       const blob = await res.blob();
       return await new Promise(resolve => {
 
+main
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => resolve(null);
         reader.readAsDataURL(blob);
       });
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 
+main
       imagesForZip.push({
         name: `image_${imagesForZip.length + 1}${extensionForType(blob.type)}`,
         blob
@@ -48,9 +57,17 @@
   }
 
   async function gatherFromDocument(doc, pageUrl) {
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+    const clone = doc.cloneNode(true);
+    clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+    const walker = document.createTreeWalker(clone, NodeFilter.SHOW_COMMENT);
+    const toRemove = [];
+    while (walker.nextNode()) toRemove.push(walker.currentNode);
+    for (const node of toRemove) node.parentNode.removeChild(node);
 
     const clone = doc.cloneNode(true);
     clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+main
     const imgs = Array.from(clone.images);
     for (const img of imgs) {
       const data = await imgToDataURL(img.src);
@@ -62,6 +79,8 @@
     }
     const html = clone.body ? clone.body.innerHTML : '';
     results.push({ url: pageUrl, html });
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 
     const text = doc.body ? doc.body.innerText : '';
     const images = Array.from(doc.images);
@@ -72,6 +91,7 @@
     }
     results.push({ url: pageUrl, text, images: dataUrls });
 
+main
   }
 
   await gatherFromDocument(document, location.href);
@@ -94,7 +114,10 @@
     }
   }
 
+m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 
+main
   let docHtml = '<html><body>';
   for (const page of results) {
     docHtml += `<h2>${page.url}</h2>`;
@@ -124,6 +147,8 @@
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(zipBlob, 'images.zip');
   }
+ m4scgx-codex/create-chrome-extension-to-save-text-and-images-in-doc
+=======
 
   let html = '<html><body>';
   for (const page of results) {
@@ -144,5 +169,6 @@
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+main
 main
 })();
